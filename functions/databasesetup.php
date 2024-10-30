@@ -64,7 +64,7 @@ class DatabaseSetup {
                     foreach ($this->newDBs as $newDBName) {
                         if ($this->isCompatibleDatabase($newDBName, $oldDBName)) {
                             $newDB = $this->getDatabaseConnection($newDBName);
-                            $this->createNewTable($newDB, $tableStructure);
+                            $this->createNewTableIfNotExists($newDB, $tableStructure, $oldTable);
                             $this->migrateTableData($newDB, $newDBName, $oldDBName, $oldTable, $bddKey);
                         }
                     }
@@ -100,16 +100,25 @@ class DatabaseSetup {
                (strpos($newDBName, 'analysis') !== false && strpos($oldDBName, 'analysis') !== false);
     }
     
-    private function createNewTable($db, $tableStructure) {
-        $db->exec("SET foreign_key_checks = 0");
-        $db->exec($tableStructure);
+    private function createNewTableIfNotExists($db, $tableStructure, $tableName) {
+        // Check if table already exists
+        $tableExists = $db->query("SHOW TABLES LIKE '$tableName'")->fetchColumn();
+        
+        if (!$tableExists) {
+            $db->exec("SET foreign_key_checks = 0");
+            
+            $tableStructure = str_replace("CREATE TABLE `$tableName`", "CREATE TABLE IF NOT EXISTS `$tableName`", $tableStructure);
+            $db->exec($tableStructure);
+    
+            $db->exec("SET foreign_key_checks = 1");
+        }
     }
     
     private function migrateTableData($db, $newDBName, $oldDBName, $table, $bddKey) {
         $insertQuery = "INSERT INTO $newDBName.$table SELECT *, '$bddKey' AS bdd_key FROM $oldDBName.$table";
         $db->exec($insertQuery);
     }
-    
+
     // Méthode de déconnexion
     public function disconnect() {
         $this->connection = null;
