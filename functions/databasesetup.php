@@ -64,7 +64,7 @@ class DatabaseSetup {
                     foreach ($this->newDBs as $newDBName) {
                         if ($this->isCompatibleDatabase($newDBName, $oldDBName)) {
                             $newDB = $this->getDatabaseConnection($newDBName);
-                            $this->createNewTableIfNotExists($newDB, $tableStructure);
+                            $this->createNewTable($newDB, $tableStructure);
                             $this->migrateTableData($newDB, $newDBName, $oldDBName, $oldTable, $bddKey);
                         }
                     }
@@ -90,16 +90,9 @@ class DatabaseSetup {
         return $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
     }
     
-    private function createNewTableIfNotExists($db, $newDBName, $table, $bddKey) {
-        $tableExists = $db->query("SHOW TABLES LIKE '$table'")->fetchColumn();
-    
-        if (!$tableExists) {
-            $tableStructure = $db->query("SHOW CREATE TABLE $table")->fetchColumn(1);
-            $modifiedTableStructure = str_replace(") ENGINE=", ", `bdd_key` VARCHAR(255)) ENGINE=", $tableStructure);
-            $createTableQuery = str_replace("CREATE TABLE `$table`", "CREATE TABLE IF NOT EXISTS `$newDBName`.`$table`", $modifiedTableStructure);
-    
-            $db->exec($createTableQuery);
-        }
+    private function getModifiedTableStructure($db, $table) {
+        $tableStructure = $db->query("SHOW CREATE TABLE $table")->fetchColumn(1);
+        return str_replace(") ENGINE=", ", `bdd_key` VARCHAR(255)) ENGINE=", $tableStructure);
     }
     
     private function isCompatibleDatabase($newDBName, $oldDBName) {
@@ -108,7 +101,7 @@ class DatabaseSetup {
     }
     
     private function createNewTable($db, $tableStructure) {
-        $db->exec("SET foreign_key_checks = 0");
+        $newDB->exec("SET foreign_key_checks = 0");
         $db->exec($tableStructure);
     }
     
