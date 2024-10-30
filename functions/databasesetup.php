@@ -92,7 +92,7 @@ class DatabaseSetup {
     
     private function getModifiedTableStructure($db, $table) {
         $tableStructure = $db->query("SHOW CREATE TABLE $table")->fetchColumn(1);
-        return str_replace(") ENGINE=", ", `bdd_key` VARCHAR(255) AFTER `id`) ENGINE=", $tableStructure);
+        return str_replace(") ENGINE=", ", `bdd_key` VARCHAR(255)) ENGINE=", $tableStructure);
     }
     
     private function isCompatibleDatabase($newDBName, $oldDBName) {
