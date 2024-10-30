@@ -64,7 +64,9 @@ class DatabaseSetup {
                         
                         foreach ($oldTables as $oldTable) {
                             $tableStructure = $this->getModifiedTableStructure($oldDB, $oldTable);
+                            echo $oldTable;
                             $this->createNewTableIfNotExists($newDB, $tableStructure, $oldTable);
+                            echo $oldTable;
                             $this->migrateTableData($newDB, $newDBName, $oldDBName, $oldTable, $bddKey);
                         }
                     }
@@ -104,6 +106,8 @@ class DatabaseSetup {
         // Check if table already exists
         $tableExists = $db->query("SHOW TABLES LIKE '$tableName'")->fetchColumn();
         
+        echo $tableExists;
+
         if (!$tableExists) {
             $db->exec("SET foreign_key_checks = 0");
             
