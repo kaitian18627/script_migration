@@ -103,17 +103,22 @@ class DatabaseSetup {
     }
     
     private function createNewTableIfNotExists($db, $tableStructure, $tableName) {
-        // Check if table already exists
-        $tableExists = $db->query("SHOW TABLES LIKE '$tableName'")->fetchColumn();
-        
-        echo $tableExists;
-
+        // Check if the table already exists
+        $query = "SELECT COUNT(*) FROM information_schema.tables 
+                  WHERE table_schema = DATABASE() AND table_name = :tableName";
+    
+        $stmt = $db->prepare($query);
+        $stmt->execute(['tableName' => $tableName]);
+        $tableExists = $stmt->fetchColumn() > 0;
+    
+        // If the table does not exist, create it
         if (!$tableExists) {
             $db->exec("SET foreign_key_checks = 0");
             
+            // Ensure to use "CREATE TABLE IF NOT EXISTS"
             $tableStructure = str_replace("CREATE TABLE `$tableName`", "CREATE TABLE IF NOT EXISTS `$tableName`", $tableStructure);
             $db->exec($tableStructure);
-    
+            
             $db->exec("SET foreign_key_checks = 1");
         }
     }
