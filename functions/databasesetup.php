@@ -61,7 +61,7 @@ class DatabaseSetup {
                 foreach ($oldTables as $oldTable) {
                     $tableStructure = $this->getModifiedTableStructure($oldDB, $oldTable);
     
-                    foreach ($this->targetDBs as $newDBName) {
+                    foreach ($this->newDBs as $newDBName) {
                         if ($this->isCompatibleDatabase($newDBName, $oldDBName)) {
                             $newDB = $this->getDatabaseConnection($newDBName);
                             $this->createNewTable($newDB, $tableStructure);
