@@ -1,27 +1,28 @@
 <?php
 class DatabaseSetup {
     private $connection;
-    private $sourceDBs;
-    private $targetDBs;
+    private $oldDBs;
+    private $newDBs;
+    private $config;
 
     public function __construct() {
         // Charger la configuration depuis le fichier config
-        $config = require __DIR__ . '/../config/config.php';
+        $this->config = require __DIR__ . '/../config/config.php';
 
-        $this->targetDBs = ['new_analysis'];
+        $this->newDBs = ['new_analysis'];
 
         try {
             // Initialiser la connexion à MySQL sans spécifier la base de données
             $this->connection = new PDO(
-                "mysql:host={$config['db_host']}",
-                $config['db_user'],
-                $config['db_pass']
+                "mysql:host={$this->config['db_host']}",
+                $this->config['db_user'],
+                $this->config['db_pass']
             );
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
             // Vérifier si la base de données existe, sinon la créer
-            foreach ($this->targetDBs as $dbName) {
-                $this->connection->exec("CREATE DATABASE IF NOT EXISTS `$dbName`");
+            foreach ($this->newDBs as $newDBName) {
+                $this->connection->exec("CREATE DATABASE IF NOT EXISTS `$newDBName`");
             }
 
             // Se connecter à la base de données
@@ -32,12 +33,8 @@ class DatabaseSetup {
         }
     }
 
-    public function getDBNamesOfOldSystem () {
-        $this->sourceDBs = $this->connection->query("SHOW DATABASES LIKE 'analysis_%'")->fetchAll(PDO::FETCH_COLUMN);
-        foreach ($this->sourceDBs as $dbName) {
-            echo $dbName . PHP_EOL; // Outputs each database name on a new line
-        }
-        return $this->sourceDBs;  
+    public function getOldDBNames () {
+        $this->oldDBs = $this->connection->query("SHOW DATABASES LIKE 'analysis_%'")->fetchAll(PDO::FETCH_COLUMN);
     }
 
     // Méthode de base pour exécuter des requêtes SQL
@@ -52,12 +49,66 @@ class DatabaseSetup {
 
     // Méthode pour la création de la base et des tables initiales
     public function createDatabaseNewSystem() {
-        // Exemple de requête pour créer une table de test
-        // Ton développeur pourra ajouter les requêtes nécessaires ici
-        $this->getDBNamesOfOldSystem();
-
+        try {
+            $this->getOldDBNames();
+    
+            foreach ($this->oldDBs as $oldDBName) {
+                $bddKey = $this->extractBddKey($oldDBName);
+                $oldDB = $this->getDatabaseConnection($oldDBName);
+    
+                $oldTables = $this->getTables($oldDB);
+    
+                foreach ($oldTables as $oldTable) {
+                    $tableStructure = $this->getModifiedTableStructure($oldDB, $oldTable);
+    
+                    foreach ($this->targetDBs as $newDBName) {
+                        if ($this->isCompatibleDatabase($newDBName, $oldDBName)) {
+                            $newDB = $this->getDatabaseConnection($newDBName);
+                            $this->createNewTable($newDB, $tableStructure);
+                            $this->migrateTableData($newDB, $newDBName, $oldDBName, $oldTable, $bddKey);
+                        }
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error in database migration: " . $e->getMessage());
+        }
     }
-
+    
+    private function extractBddKey($dbName) {
+        return str_replace('analysis_', '', $dbName);
+    }
+    
+    private function getDatabaseConnection($dbName) {
+        $dsn = "mysql:host={$this->config['db_host']};dbname={$dbName}";
+        $db = new PDO($dsn, $this->config['db_user'], $this->config['db_pass']);
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        return $db;
+    }
+    
+    private function getTables($db) {
+        return $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+    }
+    
+    private function getModifiedTableStructure($db, $table) {
+        $tableStructure = $db->query("SHOW CREATE TABLE $table")->fetchColumn(1);
+        return str_replace(") ENGINE=", ", `bdd_key` VARCHAR(255) AFTER `id`) ENGINE=", $tableStructure);
+    }
+    
+    private function isCompatibleDatabase($newDBName, $oldDBName) {
+        return (strpos($newDBName, 'user') !== false && strpos($oldDBName, 'user') !== false) ||
+               (strpos($newDBName, 'analysis') !== false && strpos($oldDBName, 'analysis') !== false);
+    }
+    
+    private function createNewTable($db, $tableStructure) {
+        $db->exec($tableStructure);
+    }
+    
+    private function migrateTableData($db, $newDBName, $oldDBName, $table, $bddKey) {
+        $insertQuery = "INSERT INTO $newDBName.$table SELECT *, '$bddKey' AS bdd_key FROM $oldDBName.$table";
+        $db->exec($insertQuery);
+    }
+    
     // Méthode de déconnexion
     public function disconnect() {
         $this->connection = null;
