@@ -64,9 +64,7 @@ class DatabaseSetup {
                         
                         foreach ($oldTables as $oldTable) {
                             $tableStructure = $this->getModifiedTableStructure($oldDB, $oldTable);
-                            echo $oldTable;
                             $this->createNewTableIfNotExists($newDB, $tableStructure, $oldTable);
-                            echo $oldTable;
                             $this->migrateTableData($newDB, $newDBName, $oldDBName, $oldTable, $bddKey);
                         }
                     }
@@ -89,8 +87,15 @@ class DatabaseSetup {
     }
     
     private function getTables($db) {
-        return $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+        // Query to select only the tables from the current database
+        $query = "SELECT TABLE_NAME 
+                  FROM information_schema.TABLES 
+                  WHERE TABLE_SCHEMA = DATABASE() 
+                  AND TABLE_TYPE = 'BASE TABLE'";
+        
+        return $db->query($query)->fetchAll(PDO::FETCH_COLUMN);
     }
+    
     
     private function getModifiedTableStructure($db, $table) {
         $tableStructure = $db->query("SHOW CREATE TABLE $table")->fetchColumn(1);
@@ -103,22 +108,15 @@ class DatabaseSetup {
     }
     
     private function createNewTableIfNotExists($db, $tableStructure, $tableName) {
-        // Check if the table already exists
-        $query = "SELECT COUNT(*) FROM information_schema.tables 
-                  WHERE table_schema = DATABASE() AND table_name = :tableName";
-    
-        $stmt = $db->prepare($query);
-        $stmt->execute(['tableName' => $tableName]);
-        $tableExists = $stmt->fetchColumn() > 0;
-    
-        // If the table does not exist, create it
+        // Check if table already exists
+        $tableExists = $db->query("SHOW TABLES LIKE '$tableName'")->fetchColumn();
+
         if (!$tableExists) {
             $db->exec("SET foreign_key_checks = 0");
             
-            // Ensure to use "CREATE TABLE IF NOT EXISTS"
             $tableStructure = str_replace("CREATE TABLE `$tableName`", "CREATE TABLE IF NOT EXISTS `$tableName`", $tableStructure);
             $db->exec($tableStructure);
-            
+    
             $db->exec("SET foreign_key_checks = 1");
         }
     }
