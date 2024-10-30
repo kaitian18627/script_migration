@@ -115,8 +115,7 @@ class DatabaseSetup {
     }
     
     private function migrateTableData($db, $newDBName, $oldDBName, $table, $bddKey) {
-        $insertQuery = "INSERT INTO $newDBName.$table SELECT *, '$bddKey' AS bdd_key FROM $oldDBName.$table
-                        ON DUPLICATE KEY UPDATE bdd_key = VALUES(bdd_key)";
+        $insertQuery = "INSERT IGNORE INTO $newDBName.$table SELECT *, '$bddKey' AS bdd_key FROM $oldDBName.$table";
         $db->exec($insertQuery);
     }    
 
