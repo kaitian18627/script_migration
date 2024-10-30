@@ -103,8 +103,6 @@ class DatabaseSetup {
     private function createNewTableIfNotExists($db, $tableStructure, $tableName) {
         // Check if table already exists
         $tableExists = $db->query("SHOW TABLES LIKE '$tableName'")->fetchColumn();
-
-        echo $tableExists;
         
         if (!$tableExists) {
             $db->exec("SET foreign_key_checks = 0");
