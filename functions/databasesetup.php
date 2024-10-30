@@ -101,7 +101,7 @@ class DatabaseSetup {
     }
     
     private function createNewTable($db, $tableStructure) {
-        $newDB->exec("SET foreign_key_checks = 0");
+        $db->exec("SET foreign_key_checks = 0");
         $db->exec($tableStructure);
     }
     
