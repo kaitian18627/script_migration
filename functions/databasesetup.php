@@ -61,9 +61,9 @@ class DatabaseSetup {
                 foreach ($this->newDBs as $newDBName) {
                     if ($this->isCompatibleDatabase($newDBName, $oldDBName)) {
                         $newDB = $this->getDatabaseConnection($newDBName);
-                        $this->createNewTableIfNotExists($newDB, $tableStructure, $oldTable);
                         
                         foreach ($oldTables as $oldTable) {
+                            $this->createNewTableIfNotExists($newDB, $tableStructure, $oldTable);
                             $tableStructure = $this->getModifiedTableStructure($oldDB, $oldTable);
                             $this->migrateTableData($newDB, $newDBName, $oldDBName, $oldTable, $bddKey);
                         }
