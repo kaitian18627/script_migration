@@ -53,7 +53,6 @@ class DatabaseSetup {
             $this->getOldDBNames();
     
             foreach ($this->oldDBs as $oldDBName) {
-                echo $oldDBName;
                 $bddKey = $this->extractBddKey($oldDBName);
                 $oldDB = $this->getDatabaseConnection($oldDBName);
     
@@ -123,9 +122,25 @@ class DatabaseSetup {
     }
     
     private function migrateTableData($db, $newDBName, $oldDBName, $table, $bddKey) {
-        $insertQuery = "INSERT IGNORE INTO $newDBName.$table SELECT *, '$bddKey' AS bdd_key FROM $oldDBName.$table";
+        // Get the columns from the new table
+        $columns = implode(", ", $this->getTableColumns($db, $newDBName, $table));
+    
+        // Build the insert query with specified columns
+        $insertQuery = "INSERT IGNORE INTO $newDBName.$table ($columns, bdd_key) 
+                        SELECT *, '$bddKey' AS bdd_key FROM $oldDBName.$table";
+    
         $db->exec($insertQuery);
-    }    
+    }
+    
+    private function getTableColumns($db, $dbName, $tableName) {
+        // Query to get the column names from the specified table
+        $query = "SELECT COLUMN_NAME 
+                  FROM information_schema.COLUMNS 
+                  WHERE TABLE_SCHEMA = '$dbName' 
+                  AND TABLE_NAME = '$tableName'";
+        
+        return $db->query($query)->fetchAll(PDO::FETCH_COLUMN);
+    }
 
     // Méthode de déconnexion
     public function disconnect() {
