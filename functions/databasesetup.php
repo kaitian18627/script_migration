@@ -53,6 +53,7 @@ class DatabaseSetup {
             $this->getOldDBNames();
     
             foreach ($this->oldDBs as $oldDBName) {
+                echo $oldDBName;
                 $bddKey = $this->extractBddKey($oldDBName);
                 $oldDB = $this->getDatabaseConnection($oldDBName);
     
@@ -85,7 +86,7 @@ class DatabaseSetup {
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $db;
     }
-    
+
     private function getTables($db) {
         // Query to select only the tables from the current database
         $query = "SELECT TABLE_NAME 
