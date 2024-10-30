@@ -7,7 +7,7 @@ require_once 'functions/logger.php';
 // Connexion à la base de données
 $db = new Database();
 try {
-	$connection = $db->connect();
+	// $connection = $db->connect();
 	$dbSetup = new DatabaseSetup();
 	$dbSetup->createDatabaseNewSystem();
 	// Déconnexion
