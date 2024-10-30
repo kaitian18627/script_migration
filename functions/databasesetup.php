@@ -122,14 +122,53 @@ class DatabaseSetup {
     }
     
     private function migrateTableData($db, $newDBName, $oldDBName, $table, $bddKey) {
-        // Get the columns from the new table
-        $columns = implode(", ", $this->getTableColumns($db, $newDBName, $table));
+        // Get columns for the new table
+        $newColumns = $this->getTableColumns($db, $newDBName, $table);
+        
+        // Fetch data from the old table
+        $oldData = $db->query("SELECT * FROM $oldDBName.$table")->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Prepare the new data with matched columns
+        $insertData = [];
+        
+        foreach ($oldData as $row) {
+            // Create an array to hold the new row data
+            $newRow = [];
+            
+            foreach ($newColumns as $column) {
+                // Check if the old row has this column
+                if (array_key_exists($column, $row)) {
+                    $newRow[$column] = $row[$column];
+                }
+            }
+            
+            // Add the bdd_key to the new row
+            $newRow['bdd_key'] = $bddKey;
+            $insertData[] = $newRow;
+        }
+        
+        // Prepare insert statement
+        if (!empty($insertData)) {
+            // Getting the column list for the insert statement
+            $columnList = implode(", ", array_keys($insertData[0]));
+            
+            // Create a values placeholder string
+            $placeholders = rtrim(str_repeat('(?' . str_repeat(', ?', count($insertData[0]) - 1) . '), ', count($insertData)), ', ');
     
-        // Build the insert query with specified columns
-        $insertQuery = "INSERT IGNORE INTO $newDBName.$table ($columns, bdd_key) 
-                        SELECT *, '$bddKey' AS bdd_key FROM $oldDBName.$table";
-    
-        $db->exec($insertQuery);
+            $insertQuery = "INSERT IGNORE INTO $newDBName.$table ($columnList) VALUES $placeholders";
+            
+            // Prepare the statement
+            $stmt = $db->prepare($insertQuery);
+            
+            // Bind values
+            $flatValues = [];
+            foreach ($insertData as $row) {
+                $flatValues = array_merge($flatValues, array_values($row));
+            }
+            
+            // Execute the statement with the values
+            $stmt->execute($flatValues);
+        }
     }
     
     private function getTableColumns($db, $dbName, $tableName) {
