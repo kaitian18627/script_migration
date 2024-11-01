@@ -191,7 +191,7 @@ class DatabaseSetup {
             foreach ($newColumns as $column) {
                 if (array_key_exists($column, $row)) {
                     // Apply offset to 'id' and any foreign key fields
-                    if ($column == 'id' || $this->isForeignKeyColumn($column, $table)) {
+                    if ($column == 'id' || $this->isForeignKeyColumn($column)) {
                         $newRow[$column] = (int)$row[$column] + $offset;
                     } else {
                         $newRow[$column] = $row[$column];
@@ -222,7 +222,7 @@ class DatabaseSetup {
         }
     }
     
-    private function isForeignKeyColumn($columnName, $tableName) {
+    private function isForeignKeyColumn($columnName) {
         // Define a method to check if the column is a foreign key reference
         // This could be achieved by checking the schema or known foreign key naming patterns
     
