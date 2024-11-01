@@ -192,7 +192,7 @@ class DatabaseSetup {
                 if (array_key_exists($column, $row)) {
                     // Apply offset to 'id' and any foreign key fields
                     if ($column == 'id' || $this->isForeignKeyColumn($column, $table)) {
-                        $newRow[$column] = $row[$column] + $offset;
+                        $newRow[$column] = (int)$row[$column] + $offset;
                     } else {
                         $newRow[$column] = $row[$column];
                     }
