@@ -67,7 +67,7 @@ class DatabaseSetup {
                         foreach ($oldTables as $oldTable) {
                             $tableStructure = $this->getModifiedTableStructure($oldDB, $oldTable);
                             $this->createNewTableIfNotExists($newDB, $tableStructure, $oldTable);
-                            $this->migrateTableData($newDB, $newDBName, $oldDBName, $oldTable, $bddKey);
+                            $this->migrateTableData($newDB, $newDBName, $oldDBName, $oldTable, $bddKey, $offset);
                         }
                     }
                 }
