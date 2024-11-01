@@ -71,9 +71,8 @@ class DatabaseSetup {
                         }
                     }
                 }
+                $offset += 1000;
             }
-
-            $offset += 1000;
         } catch (Exception $e) {
             error_log("Error in database migration: " . $e->getMessage());
         }
@@ -193,7 +192,6 @@ class DatabaseSetup {
                     // Apply offset to 'id' and any foreign key fields
                     if ($column == 'id' || $this->isForeignKeyColumn($column)) {
                         $newRow[$column] = (int)$row[$column] + $offset;
-                        echo $newRow[$column];
                     } else {
                         $newRow[$column] = $row[$column];
                     }
