@@ -10,8 +10,9 @@ try {
 	// $connection = $db->connect();
 	$dbSetup = new DatabaseSetup();
 	$dbSetup->createDatabaseNewSystem();
+	$dbSetup->deleteRowFromSteppersOfUsers();
 	// Déconnexion
-        $dbSetup->disconnect();
+	$dbSetup->disconnect();
     // Exécutez vos requêtes ici
 echo "connexion success";
 } catch (Exception $e) {
