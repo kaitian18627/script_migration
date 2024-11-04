@@ -10,15 +10,15 @@ try {
 	// $connection = $db->connect();
 	$dbSetup = new DatabaseSetup();
 	$dbSetup->createDatabaseNewSystem();
-	echo "Created New Database System";
+	echo "Système de nouvelle base de données créé\n";
 	$dbSetup->deleteRowFromSteppersOfUsers();
-	echo "Deleted rows from steppers table from users db";
+	echo "Lignes supprimées de la table steppers de la base de données utilisateurs\n";
+	echo "Veuillez tester et supprimer les anciennes bases de données\n";
 	// Déconnexion
 	$dbSetup->disconnect();
     // Exécutez vos requêtes ici
-	echo "connexion success";
+	echo "connexion réussie\n";
 } catch (Exception $e) {
     Logger::log($e->getMessage());
 }
 ?>
-

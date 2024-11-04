@@ -6,13 +6,13 @@ class DatabaseSetup {
     private $config;
 
     public function __construct() {
-        // Charger la configuration depuis le fichier config
+        // Charger la configuration depuis le fichier de configuration
         $this->config = require __DIR__ . '/../config/config.php';
 
         $this->newDBs = ['new_analysis'];
 
         try {
-            // Initialiser la connexion à MySQL sans spécifier la base de données
+            // Initialiser la connexion MySQL sans spécifier la base de données
             $this->connection = new PDO(
                 "mysql:host={$this->config['db_host']}",
                 $this->config['db_user'],
@@ -20,14 +20,12 @@ class DatabaseSetup {
             );
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            // Vérifier si la base de données existe, sinon la créer
+            // Vérifier si la base de données existe ; sinon, la créer
             foreach ($this->newDBs as $newDBName) {
                 $this->connection->exec("CREATE DATABASE IF NOT EXISTS `$newDBName`");
             }
 
-            // Se connecter à la base de données
-            // $this->connection->exec("USE `$dbName`");
-            echo "Connexion réussie à la base de données.";
+            echo "Connexion réussie à la base de données.\n";
         } catch (PDOException $e) {
             die("Erreur de connexion : " . $e->getMessage());
         }
@@ -41,29 +39,29 @@ class DatabaseSetup {
     public function executeQuery($sql) {
         try {
             $this->connection->exec($sql);
-            echo "Requête exécutée avec succès.";
+            echo "Requête exécutée avec succès.\n";
         } catch (PDOException $e) {
-            echo "Erreur lors de l'exécution de la requête : " . $e->getMessage();
+            echo "Erreur lors de l'exécution de la requête : " . $e->getMessage(\n);
         }
     }
 
     public function deleteRowFromSteppersOfUsers() {
-        // Create a new PDO connection
+        // Créer une nouvelle connexion PDO
         try {
-            // Create a new PDO connection
+            // Créer une nouvelle connexion PDO
             $db = $this->getDatabaseConnection('users');
         
-            // SQL query to delete rows where the method column is COMPLIANCE
+            // Requête SQL pour supprimer les lignes où la colonne méthode est COMPLIANCE
             $sql = "DELETE FROM steppers WHERE method = 'COMPLIANCE'";
         
-            // Execute the query
+            // Exécuter la requête
             $stmt = $db->prepare($sql);
             $stmt->execute();
         } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
+            echo "Erreur : " . $e->getMessage(\n);
         }
         
-        // Close the connection
+        // Fermer la connexion
         $db = null;
     }
 
@@ -94,7 +92,7 @@ class DatabaseSetup {
                 $offset += 1000;
             }
         } catch (Exception $e) {
-            error_log("Error in database migration: " . $e->getMessage());
+            error_log("Erreur dans la migration de la base de données : " . $e->getMessage());
         }
     }
     
@@ -110,7 +108,7 @@ class DatabaseSetup {
     }
 
     private function getTables($db) {
-        // Query to select only the tables from the current database
+        // Requête pour sélectionner uniquement les tables de la base de données actuelle
         $query = "SELECT TABLE_NAME 
                   FROM information_schema.TABLES 
                   WHERE TABLE_SCHEMA = DATABASE() 
@@ -131,7 +129,7 @@ class DatabaseSetup {
     }
     
     private function createNewTableIfNotExists($db, $tableStructure, $tableName) {
-        // Check if table already exists
+        // Vérifier si la table existe déjà
         $tableExists = $db->query("SHOW TABLES LIKE '$tableName'")->fetchColumn();
 
         if (!$tableExists) {
@@ -143,65 +141,15 @@ class DatabaseSetup {
             $db->exec("SET foreign_key_checks = 1");
         }
     }
-    
-    // private function migrateTableData($db, $newDBName, $oldDBName, $table, $bddKey) {
-    //     // Get columns for the new table
-    //     $newColumns = $this->getTableColumns($db, $newDBName, $table);
-        
-    //     // Fetch data from the old table
-    //     $oldData = $db->query("SELECT * FROM $oldDBName.$table")->fetchAll(PDO::FETCH_ASSOC);
-        
-    //     // Prepare the new data with matched columns
-    //     $insertData = [];
-        
-    //     foreach ($oldData as $row) {
-    //         // Create an array to hold the new row data
-    //         $newRow = [];
-            
-    //         foreach ($newColumns as $column) {
-    //             // Check if the old row has this column
-    //             if (array_key_exists($column, $row)) {
-    //                 $newRow[$column] = $row[$column];
-    //             }
-    //         }
-            
-    //         // Add the bdd_key to the new row
-    //         $newRow['bdd_key'] = $bddKey;
-    //         $insertData[] = $newRow;
-    //     }
-        
-    //     // Prepare insert statement
-    //     if (!empty($insertData)) {
-    //         // Getting the column list for the insert statement
-    //         $columnList = implode(", ", array_keys($insertData[0]));
-            
-    //         // Create a values placeholder string
-    //         $placeholders = rtrim(str_repeat('(?' . str_repeat(', ?', count($insertData[0]) - 1) . '), ', count($insertData)), ', ');
-    
-    //         $insertQuery = "INSERT IGNORE INTO $newDBName.$table ($columnList) VALUES $placeholders";
-            
-    //         // Prepare the statement
-    //         $stmt = $db->prepare($insertQuery);
-            
-    //         // Bind values
-    //         $flatValues = [];
-    //         foreach ($insertData as $row) {
-    //             $flatValues = array_merge($flatValues, array_values($row));
-    //         }
-            
-    //         // Execute the statement with the values
-    //         $stmt->execute($flatValues);
-    //     }
-    // }
 
     private function migrateTableData($db, $newDBName, $oldDBName, $table, $bddKey, $offset) {
-        // Get columns for the new table
+        // Obtenir les colonnes pour la nouvelle table
         $newColumns = $this->getTableColumns($db, $newDBName, $table);
     
-        // Fetch data from the old table
+        // Récupérer les données de l'ancienne table
         $oldData = $db->query("SELECT * FROM $oldDBName.$table")->fetchAll(PDO::FETCH_ASSOC);
     
-        // Prepare the new data with matched columns and offset ids
+        // Préparer les nouvelles données avec les colonnes correspondantes et décaler les IDs
         $insertData = [];
     
         foreach ($oldData as $row) {
@@ -209,7 +157,7 @@ class DatabaseSetup {
     
             foreach ($newColumns as $column) {
                 if (array_key_exists($column, $row)) {
-                    // Apply offset to 'id' and any foreign key fields
+                    // Appliquer un décalage aux 'id' et aux champs de clé étrangère
                     if ($column == 'id' || $this->isForeignKeyColumn($column)) {
                         $newRow[$column] = (int)$row[$column] + $offset;
                     } else {
@@ -218,12 +166,12 @@ class DatabaseSetup {
                 }
             }
     
-            // Add the bdd_key to the new row
+            // Ajouter la clé bdd_key à la nouvelle ligne
             $newRow['bdd_key'] = $bddKey;
             $insertData[] = $newRow;
         }
     
-        // Prepare insert statement
+        // Préparer l'instruction d'insertion
         if (!empty($insertData)) {
             $columnList = implode(", ", array_keys($insertData[0]));
             $placeholders = rtrim(str_repeat('(?' . str_repeat(', ?', count($insertData[0]) - 1) . '), ', count($insertData)), ', ');
@@ -242,15 +190,15 @@ class DatabaseSetup {
     }
     
     private function isForeignKeyColumn($columnName) {
-        // Define a method to check if the column is a foreign key reference
-        // This could be achieved by checking the schema or known foreign key naming patterns
+        // Définir une méthode pour vérifier si la colonne est une référence de clé étrangère
+        // Cela pourrait être fait en vérifiant le schéma ou des modèles de nommage de clés étrangères connus
     
-        // Example naming pattern for foreign keys
+        // Exemple de modèle de nommage pour les clés étrangères
         return strpos($columnName, '_id') !== false;
     }
     
     private function getTableColumns($db, $dbName, $tableName) {
-        // Query to get the column names from the specified table
+        // Requête pour obtenir les noms de colonnes de la table spécifiée
         $query = "SELECT COLUMN_NAME 
                   FROM information_schema.COLUMNS 
                   WHERE TABLE_SCHEMA = '$dbName' 
@@ -262,7 +210,6 @@ class DatabaseSetup {
     // Méthode de déconnexion
     public function disconnect() {
         $this->connection = null;
-        echo "Déconnexion réussie.";
+        echo "Déconnexion réussie.\n";
     }
 }
-
