@@ -50,23 +50,21 @@ class DatabaseSetup {
     public function deleteRowFromSteppersOfUsers() {
         // Create a new PDO connection
         try {
-            $pdo = new PDO("mysql:host=$this->config['db_host'];dbname=users", $this->config['db_host'], $this->config['db_pass']);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+            // Create a new PDO connection
+            $db = $this->getDatabaseConnection('users');
+        
             // SQL query to delete rows where the method column is COMPLIANCE
             $sql = "DELETE FROM steppers WHERE method = 'COMPLIANCE'";
-
+        
             // Execute the query
-            $stmt = $pdo->prepare($sql);
+            $stmt = $db->prepare($sql);
             $stmt->execute();
-
-            echo "Rows deleted successfully.";
         } catch (PDOException $e) {
             echo "Error: " . $e->getMessage();
         }
         
         // Close the connection
-        $pdo = null;
+        $db = null;
     }
 
     // Méthode pour la création de la base et des tables initiales
