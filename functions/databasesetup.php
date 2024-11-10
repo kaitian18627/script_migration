@@ -89,7 +89,7 @@ class DatabaseSetup {
                         }
                     }
                 }
-                $offset += 1000;
+                $offset += 10000;
             }
         } catch (Exception $e) {
             error_log("Erreur dans la migration de la base de données : " . $e->getMessage());
@@ -129,65 +129,72 @@ class DatabaseSetup {
     }
     
     private function createNewTableIfNotExists($db, $tableStructure, $tableName) {
-        // Vérifier si la table existe déjà
-        $tableExists = $db->query("SHOW TABLES LIKE '$tableName'")->fetchColumn();
-
-        if (!$tableExists) {
-            $db->exec("SET foreign_key_checks = 0");
+        try {
+            $db->exec("SET foreign_key_checks = 0"); // Désactiver les vérifications de clé étrangère
             
-            $tableStructure = str_replace("CREATE TABLE `$tableName`", "CREATE TABLE IF NOT EXISTS `$tableName`", $tableStructure);
-            $db->exec($tableStructure);
-    
-            $db->exec("SET foreign_key_checks = 1");
+            // Vérifier si la table existe
+            $tableExists = $db->query("SHOW TABLES LIKE '$tableName'")->fetchColumn();
+            
+            if (!$tableExists) {
+                // Modifier la structure de la table pour ajouter "IF NOT EXISTS"
+                $tableStructure = str_replace("CREATE TABLE `$tableName`", "CREATE TABLE IF NOT EXISTS `$tableName`", $tableStructure);
+                $db->exec($tableStructure);
+            }
+        } catch (PDOException $e) {
+            echo "Erreur lors de la création de la table : " . $e->getMessage();
+        } finally {
+            $db->exec("SET foreign_key_checks = 1"); // Réactiver les vérifications de clé étrangère
         }
     }
 
     private function migrateTableData($db, $newDBName, $oldDBName, $table, $bddKey, $offset) {
-        // Obtenir les colonnes pour la nouvelle table
-        $newColumns = $this->getTableColumns($db, $newDBName, $table);
+        try {
+            $db->exec("SET foreign_key_checks = 0"); // Désactiver temporairement les vérifications de clé étrangère
     
-        // Récupérer les données de l'ancienne table
-        $oldData = $db->query("SELECT * FROM $oldDBName.$table")->fetchAll(PDO::FETCH_ASSOC);
-    
-        // Préparer les nouvelles données avec les colonnes correspondantes et décaler les IDs
-        $insertData = [];
-    
-        foreach ($oldData as $row) {
-            $newRow = [];
-    
-            foreach ($newColumns as $column) {
-                if (array_key_exists($column, $row)) {
-                    // Appliquer un décalage aux 'id' et aux champs de clé étrangère
-                    if ($column == 'id' || $this->isForeignKeyColumn($column)) {
-                        $newRow[$column] = (int)$row[$column] + $offset;
-                    } else {
-                        $newRow[$column] = $row[$column];
+            // Obtenir les colonnes pour la nouvelle table
+            $newColumns = $this->getTableColumns($db, $newDBName, $table);
+            
+            // Récupérer les données de l'ancienne table
+            $oldData = $db->query("SELECT * FROM $oldDBName.$table")->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Préparer les données avec le mappage des colonnes et l'ajustement de l'offset des ID
+            $insertData = [];
+            
+            foreach ($oldData as $row) {
+                $newRow = [];
+                foreach ($newColumns as $column) {
+                    if (array_key_exists($column, $row)) {
+                        // Appliquer un offset aux champs 'id' et clés étrangères
+                        if ($column === 'id' || $this->isForeignKeyColumn($column)) {
+                            $newRow[$column] = (int)$row[$column] + $offset;
+                        } else {
+                            $newRow[$column] = $row[$column];
+                        }
                     }
                 }
+                // Ajouter la clé bdd_key à chaque ligne
+                $newRow['bdd_key'] = $bddKey;
+                $insertData[] = $newRow;
             }
-    
-            // Ajouter la clé bdd_key à la nouvelle ligne
-            $newRow['bdd_key'] = $bddKey;
-            $insertData[] = $newRow;
-        }
-    
-        // Préparer l'instruction d'insertion
-        if (!empty($insertData)) {
-            $columnList = implode(", ", array_keys($insertData[0]));
-            $placeholders = rtrim(str_repeat('(?' . str_repeat(', ?', count($insertData[0]) - 1) . '), ', count($insertData)), ', ');
-    
-            $insertQuery = "INSERT IGNORE INTO $newDBName.$table ($columnList) VALUES $placeholders";
-    
-            $stmt = $db->prepare($insertQuery);
-    
-            $flatValues = [];
-            foreach ($insertData as $row) {
-                $flatValues = array_merge($flatValues, array_values($row));
+            
+            // Construire et exécuter la requête d'insertion
+            if (!empty($insertData)) {
+                $columnList = implode(", ", array_keys($insertData[0]));
+                $placeholders = rtrim(str_repeat('(' . str_repeat('?, ', count($insertData[0]) - 1) . '?), ', count($insertData)), ', ');
+                
+                $insertQuery = "INSERT IGNORE INTO $newDBName.$table ($columnList) VALUES $placeholders";
+                $stmt = $db->prepare($insertQuery);
+                
+                // Aplatir le tableau de données pour les paramètres liés
+                $flatValues = array_merge(...array_map('array_values', $insertData));
+                $stmt->execute($flatValues);
             }
-    
-            $stmt->execute($flatValues);
+        } catch (PDOException $e) {
+            echo "Erreur lors de la migration des données : " . $e->getMessage();
+        } finally {
+            $db->exec("SET foreign_key_checks = 1"); // Réactiver les vérifications de clé étrangère
         }
-    }
+    }    
     
     private function isForeignKeyColumn($columnName) {
         // Définir une méthode pour vérifier si la colonne est une référence de clé étrangère
