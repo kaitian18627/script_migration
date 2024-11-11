@@ -171,7 +171,7 @@ class DatabaseSetup {
                     if (array_key_exists($column, $row)) {
                         // Appliquer un offset aux champs 'id' et clés étrangères
                         if ($column === 'id' || $this->isForeignKeyColumn($column)) {
-                            $newRow[$column] = (int)$row[$column] + $offset;
+                            $newRow[$column] = $row[$column] !== null ? (int)$row[$column] + $offset : null;
                         } else {
                             $newRow[$column] = $row[$column];
                         }
