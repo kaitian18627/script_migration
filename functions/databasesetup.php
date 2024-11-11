@@ -59,6 +59,9 @@ class DatabaseSetup {
             $stmt->execute();
         } catch (PDOException $e) {
             echo "Erreur : " . $e->getMessage(\n);
+        } finally {
+            echo "Lignes supprimées de la table steppers de la base de données utilisateurs\n";
+            echo "Veuillez tester et supprimer les anciennes bases de données\n";
         }
         
         // Fermer la connexion
@@ -93,6 +96,8 @@ class DatabaseSetup {
             }
         } catch (Exception $e) {
             error_log("Erreur dans la migration de la base de données : " . $e->getMessage());
+        } finally {
+            echo "Système de nouvelle base de données créé\n";
         }
     }
     

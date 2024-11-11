@@ -1,1 +1,11 @@
 [2024-10-30 10:18:57] - Erreur de connexion : SQLSTATE[HY000] [2006] MySQL server has gone away
+[2024-11-10 23:48:49] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-10 23:55:59] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-10 23:57:26] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-10 23:57:46] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-10 23:58:16] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-10 23:59:39] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:00:06] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:03:12] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:03:37] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:04:42] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
