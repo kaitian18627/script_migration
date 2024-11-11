@@ -17,6 +17,8 @@ class DatabaseTest {
                 $this->config['db_pass']
             );
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            
 
             echo "Connexion réussie à la base de données.\n";
         } catch (PDOException $e) {
@@ -67,7 +69,6 @@ class DatabaseTest {
 
     // Vérifier que toutes les clés étrangères dans la nouvelle base de données sont valides
     public function checkForeignKeys() {
-        echo "test foreign keys";
         $tables = $this->getTablesInDatabase($this->newDBName);
         $errors = [];
 
@@ -103,18 +104,25 @@ class DatabaseTest {
 
     // Vérifier si la clé étrangère pointe vers une table et une colonne existantes
     private function foreignKeyIsValid($foreignKey) {
-        $refTable = $foreignKey['REFERENCED_TABLE_NAME'];
-        $refColumn = $foreignKey['REFERENCED_COLUMN_NAME'];
+        try {
+            $refTable = $foreignKey['REFERENCED_TABLE_NAME'];
+            $refColumn = $foreignKey['REFERENCED_COLUMN_NAME'];
 
-        // Vérifier si la table référencée existe
-        $tableExists = $this->connection->query("SHOW TABLES LIKE '$refTable'")->fetchColumn();
-        if (!$tableExists) {
-            return false;
+            $this->connection->exec("USE {$this->newDBName}");
+
+            // Vérifier si la table référencée existe
+            $tableExists = $this->connection->query("SHOW TABLES LIKE '$refTable'")->fetchAll(PDO::FETCH_COLUMN);
+            if (!$tableExists) {
+                return false;
+            }
+
+            // Vérifier si la colonne référencée existe dans la table
+            $columnExists = $this->connection->query("SHOW COLUMNS FROM `$refTable` LIKE '$refColumn'")->fetchAll(PDO::FETCH_COLUMN);
+            return $columnExists !== false;
+        } catch (PDOException $e) {
+            // Handle the exception gracefully
+            echo "Error occurred: " . $e->getMessage();
         }
-
-        // Vérifier si la colonne référencée existe dans la table
-        $columnExists = $this->connection->query("SHOW COLUMNS FROM `$refTable` LIKE '$refColumn'")->fetchColumn();
-        return $columnExists !== false;
     }
 
     // Méthode pour fermer la connexion à la base de données

@@ -9,3 +9,44 @@
 [2024-11-11 00:03:12] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
 [2024-11-11 00:03:37] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
 [2024-11-11 00:04:42] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:07:12] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:10:46] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:13:42] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:17:56] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:18:38] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:19:22] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:20:05] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:21:05] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:24:12] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:25:20] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:25:57] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:26:15] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:27:24] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:28:35] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:28:41] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:29:00] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:29:59] - SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ':refTable' at line 1
+[2024-11-11 00:32:02] - SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ':refTable' at line 1
+[2024-11-11 00:34:56] - SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ':refTable' at line 1
+[2024-11-11 00:35:08] - SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ':refTable' at line 1
+[2024-11-11 00:35:23] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:35:33] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:38:07] - SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '`'ebiosrm_objectives__risk_sources'`' at line 1
+[2024-11-11 00:38:33] - SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '`ebiosrm_objectives__risk_sources`' at line 1
+[2024-11-11 00:40:08] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:41:38] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:42:34] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:43:42] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:43:58] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:45:36] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:45:56] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:46:15] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:46:36] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:47:41] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:48:21] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:48:42] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:50:04] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:51:03] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:51:18] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:54:05] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
+[2024-11-11 00:54:43] - SQLSTATE[3D000]: Invalid catalog name: 1046 No database selected
