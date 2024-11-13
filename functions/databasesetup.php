@@ -171,7 +171,7 @@ class DatabaseSetup {
                     if (array_key_exists($column, $row)) {
                         // Appliquer un offset aux champs 'id' et clés étrangères
                         if ($column === 'id' || $this->isForeignKeyColumn($column)) {
-                            $newRow[$column] = $row[$column] !== null ? (int)$row[$column] + $offset : null;
+                            $newRow[$column] = ($row[$column] !== null && is_int($row[$column])) ? $row[$column] + $offset : $row[$column];
                         } else {
                             $newRow[$column] = $row[$column];
                         }
@@ -206,7 +206,7 @@ class DatabaseSetup {
         // Cela pourrait être fait en vérifiant le schéma ou des modèles de nommage de clés étrangères connus
     
         // Exemple de modèle de nommage pour les clés étrangères
-        return strpos($columnName, '_id') !== false;
+        return strpos($columnName, '_id') !== false || strpos($columnName, 'id_') !== false;
     }
     
     private function getTableColumns($db, $dbName, $tableName) {
