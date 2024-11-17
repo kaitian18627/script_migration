@@ -124,28 +124,29 @@ class DatabaseSetup {
     
     
     private function getModifiedTableStructure($db, $table) {
-        // Fetch the table structure using SHOW CREATE TABLE
+        // Récupérer la structure de la table en utilisant SHOW CREATE TABLE
         $tableStructure = $db->query("SHOW CREATE TABLE $table")->fetchColumn(1);
-    
-        // Use regex to replace SMALLINT with INT, excluding 'id', foreign keys ending in '_id', and 'root'
+        
+        // Utiliser une expression régulière pour remplacer SMALLINT par INT, en excluant 'id', les clés étrangères finissant par '_id' et 'root'
         $modifiedStructure = preg_replace_callback(
             '/`(\w+)`\s+smallint\(\d+\)/',
             function ($matches) {
-                // Check if the column name is 'id', ends with '_id', or is 'root'
+                // Vérifier si le nom de la colonne est 'ref', 'id', une clé étrangère ou 'root'
                 $columnName = $matches[1];
                 if ($columnName === 'ref' || $columnName === 'id' || $this->isForeignKeyColumn($columnName) || $columnName === 'root') {
-                    return preg_replace('/smallint\(\d+\)/', 'int(11)', $matches[0]); // Replace SMALLINT with INT
+                    return preg_replace('/smallint\(\d+\)/', 'int(11)', $matches[0]); // Remplacer SMALLINT par INT
                 }
-                return $matches[0]; // Leave the definition unchanged
+                return $matches[0]; // Laisser la définition inchangée si ce n'est pas une colonne concernée
             },
             $tableStructure
         );
-
-        // Add `bdd_key` column modification
+    
+        // Ajouter la modification pour la colonne `bdd_key`
         $modifiedStructure = str_replace(") ENGINE=", ", `bdd_key` VARCHAR(255)) ENGINE=", $modifiedStructure);
-
+    
         return $modifiedStructure;
     }
+    
     
     private function isCompatibleDatabase($newDBName, $oldDBName) {
         return (strpos($newDBName, 'user') !== false && strpos($oldDBName, 'user') !== false) ||
