@@ -124,8 +124,27 @@ class DatabaseSetup {
     
     
     private function getModifiedTableStructure($db, $table) {
+        // Fetch the table structure using SHOW CREATE TABLE
         $tableStructure = $db->query("SHOW CREATE TABLE $table")->fetchColumn(1);
-        return str_replace(") ENGINE=", ", `bdd_key` VARCHAR(255)) ENGINE=", $tableStructure);
+    
+        // Use regex to replace SMALLINT with INT, excluding 'id', foreign keys ending in '_id', and 'root'
+        $modifiedStructure = preg_replace_callback(
+            '/`(\w+)`\s+smallint\(\d+\)/',
+            function ($matches) {
+                // Check if the column name is 'id', ends with '_id', or is 'root'
+                $columnName = $matches[1];
+                if ($columnName === 'ref' || $columnName === 'id' || $this->isForeignKeyColumn($columnName) || $columnName === 'root') {
+                    return preg_replace('/smallint\(\d+\)/', 'int(11)', $matches[0]); // Replace SMALLINT with INT
+                }
+                return $matches[0]; // Leave the definition unchanged
+            },
+            $tableStructure
+        );
+
+        // Add `bdd_key` column modification
+        $modifiedStructure = str_replace(") ENGINE=", ", `bdd_key` VARCHAR(255)) ENGINE=", $modifiedStructure);
+
+        return $modifiedStructure;
     }
     
     private function isCompatibleDatabase($newDBName, $oldDBName) {
@@ -170,7 +189,7 @@ class DatabaseSetup {
                 foreach ($newColumns as $column) {
                     if (array_key_exists($column, $row)) {
                         // Appliquer un offset aux champs 'id' et clés étrangères
-                        if ($column === 'id' || $this->isForeignKeyColumn($column)) {
+                        if ($column === 'id' || $this->isForeignKeyColumn($column) || $column === 'root') {
                             $newRow[$column] = ($row[$column] !== null && is_int($row[$column])) ? $row[$column] + $offset : $row[$column];
                         } else {
                             $newRow[$column] = $row[$column];
